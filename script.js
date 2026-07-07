@@ -27,8 +27,11 @@ function renderList() {
     myLeads.forEach(function (lead, index) {
         let li = document.createElement("li")
 
-        let textSpan = document.createElement("span")
-        textSpan.textContent = lead
+        let link = document.createElement("a")
+        link.textContent = lead
+        link.href = lead
+        link.target = "_blank"
+        link.rel = "noopener noreferrer"
 
         let deleteBtn = document.createElement("button")
         deleteBtn.textContent = "✕"
@@ -38,7 +41,7 @@ function renderList() {
             renderList()
         })
 
-        li.appendChild(textSpan)
+        li.appendChild(link)
         li.appendChild(deleteBtn)
         list.appendChild(li)
     })
