@@ -2,7 +2,34 @@ let saveButton = document.getElementById("input-btn")
 const inputField = document.getElementById("input-el")
 const list = document.getElementById("list")
 const errorEl = document.getElementById("error-el")
-const myLeads = []
+let myLeads = []
+
+// Detect whether we're running as a Chrome extension or a normal webpage
+const isExtension = typeof chrome !== "undefined" && chrome.storage && chrome.storage.local
+
+
+
+
+function saveToStorage() {
+    if (isExtension) {
+        chrome.storage.local.set({ myLeads: myLeads })
+    } else {
+        localStorage.setItem("myLeads", JSON.stringify(myLeads))
+    }
+}
+
+function loadFromStorage(callback) {
+    if (isExtension) {
+        chrome.storage.local.get(["myLeads"], function (result) {
+            myLeads = result.myLeads || []
+            callback()
+        })
+    } else {
+        const stored = localStorage.getItem("myLeads")
+        myLeads = stored ? JSON.parse(stored) : []
+        callback()
+    }
+}
 
 function addLead() {
     let value = inputField.value.trim()
@@ -14,11 +41,11 @@ function addLead() {
 
     errorEl.textContent = ""
     myLeads.push(value)
-    console.log(myLeads)
 
     inputField.value = ""
     inputField.focus()
 
+    saveToStorage()
     renderList()
 }
 
@@ -38,6 +65,7 @@ function renderList() {
         deleteBtn.className = "delete-btn"
         deleteBtn.addEventListener("click", function () {
             myLeads.splice(index, 1)
+            saveToStorage()
             renderList()
         })
 
@@ -46,6 +74,9 @@ function renderList() {
         list.appendChild(li)
     })
 }
+
+// Load saved leads on startup, then render
+loadFromStorage(renderList)
 
 saveButton.addEventListener("click", addLead)
 
